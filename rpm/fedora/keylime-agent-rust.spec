@@ -4,18 +4,17 @@
 
 %global crate keylime_agent
 
-%if 0%{?fedora} < 38
-# For older Fedora versions, use vendored dependencies due to broken packages
+# On Fedora-38 and current Rawhide, it is not possible to build due to missing
+# dependency base64 version 0.13 (required by rust-tss-esapi)
+# Also due to https://github.com/tpm2-software/tpm2-tools/issues/3210,
+# tpm2-tools is currently broken.
+# Use vendored dependencies for all Fedora versions.
 %global bundled_rust_deps 1
-%else
-# Otherwise, use only system Rust libraries
-%global bundled_rust_deps 0
-%endif
 
 %global __brp_mangle_shebangs_exclude_from ^/usr/src/debug/.*$
 
 Name:           keylime-agent-rust
-Version:        0.2.0
+Version:        0.2.1
 Release:        %{?autorelease}%{!?autorelease:1%{?dist}}
 Summary:        Rust agent for Keylime
 
@@ -59,6 +58,7 @@ Patch1:         rust-keylime-metadata.patch
 ExclusiveArch:  %{rust_arches}
 
 Requires: tpm2-tss
+Requires: util-linux-core
 
 # The keylime-base package provides the keylime user creation. It is available
 # from Fedora 36
@@ -108,7 +108,6 @@ EOF
 
 mkdir -p %{buildroot}/%{_sharedstatedir}/keylime
 mkdir -p --mode=0700 %{buildroot}/%{_rundir}/keylime
-mkdir -p --mode=0700 %{buildroot}/%{_localstatedir}/log/keylime
 mkdir -p --mode=0700 %{buildroot}/%{_libexecdir}/keylime
 mkdir -p --mode=0700  %{buildroot}/%{_sysconfdir}/keylime
 mkdir -p --mode=0700  %{buildroot}/%{_sysconfdir}/keylime/agent.conf.d
@@ -159,7 +158,6 @@ chown -R keylime:keylime %{_sysconfdir}/keylime
 %{_unitdir}/keylime_agent.service
 %{_unitdir}/var-lib-keylime-secure.mount
 %attr(700,keylime,keylime) %dir %{_rundir}/keylime
-%attr(700,keylime,keylime) %dir %{_localstatedir}/log/keylime
 %attr(700,keylime,keylime) %{_sharedstatedir}/keylime
 %attr(700,keylime,keylime) %{_libexecdir}/keylime
 %{_bindir}/keylime_agent
