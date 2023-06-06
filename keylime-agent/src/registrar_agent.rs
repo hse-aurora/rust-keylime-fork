@@ -22,6 +22,14 @@ struct Register<'a> {
     ek_tpm: &'a [u8],
     #[serde(serialize_with = "serialize_as_base64")]
     aik_tpm: &'a [u8],
+    #[serde(serialize_with = "serialize_as_base64")]
+    iak_tpm: &'a [u8],
+    #[serde(serialize_with = "serialize_as_base64")]
+    idevid_tpm: &'a [u8],
+    #[serde(serialize_with = "serialize_maybe_base64", skip_serializing_if = "Option::is_none")]
+    iak_attest: Option<Vec<u8>>,
+    #[serde(serialize_with = "serialize_maybe_base64", skip_serializing_if = "Option::is_none")]
+    iak_sign: Option<Vec<u8>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     mtls_cert: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -94,6 +102,10 @@ pub(crate) async fn do_register_agent(
     ek_tpm: &[u8],
     ekcert: Option<Vec<u8>>,
     aik_tpm: &[u8],
+    iak_tpm: Option<&[u8]>,
+    idevid_tpm: Option<&[u8]>,
+    iak_attest: Option<Vec<u8>>,
+    iak_sign: Option<Vec<u8>>,
     mtls_cert_x509: Option<&X509>,
     ip: &str,
     port: u32,
@@ -109,10 +121,25 @@ pub(crate) async fn do_register_agent(
         Some(ip.to_string())
     };
 
+    let zero = &[u8::MIN];
+    let iak_tpm = match iak_tpm {
+        None => zero,
+        Some(iak_tpm) => iak_tpm,
+    };
+
+    let idevid_tpm = match idevid_tpm {
+        None => zero,
+        Some(idevid_tpm) => idevid_tpm,
+    };
+
     let data = Register {
         ekcert,
         ek_tpm,
         aik_tpm,
+        iak_tpm,
+        idevid_tpm,
+        iak_attest,
+        iak_sign,
         mtls_cert,
         ip,
         port: Some(port),
