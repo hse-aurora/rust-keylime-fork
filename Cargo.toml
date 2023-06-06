@@ -1,8 +1,3 @@
 [workspace]
 
 members = ["keylime", "keylime-agent", "keylime-ima-emulator"]
-
-tss-esapi-sys = "0.3.0"    # FFI wrapper around TSS 2.0 Enhanced System API
-tss-sapi = "0.0.4"         # Bindings to the TPM 2.0 TSS SAPI
-tpm2 = "0.0.4"             # Pure Rust TPM2 TSS
-tss2 = "0.1.3"             # Rust wrapper for tpm2-tss
